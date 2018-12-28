@@ -1,0 +1,6 @@
+{
+  "repo": "git://github.com/apenwarr/builder-test.git",
+  "build_path": "/Users/jtang/develop/src/github.com/jcftang/gitbuilder/build",
+  "out_path" : "/Users/jtang/develop/src/github.com/jcftang/gitbuilder/out",
+  "build_script" : "/Users/jtang/develop/src/github.com/jcftang/gitbuilder/build.sh"
+}
