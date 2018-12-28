@@ -207,15 +207,15 @@ func (b *BuildRoot) bisect(pass, fail string) (string, error) {
 	if pass == "" || fail == "" {
 		return "", nil
 	}
-	_, err := exec.Command("git", "bisect", "--first-parent",
+	out, err := exec.Command("git", "bisect", "--first-parent",
 		"--bisect-all", fmt.Sprintf("%s^", fail), fmt.Sprintf("^%s", pass)).Output()
 	if err != nil {
 		log.Info("git bisect all failed", " pass=", pass, " fail=", fail)
-	}
-	out, err := exec.Command("git", "bisect", "--first-parent",
-		fmt.Sprintf("%s^", fail), fmt.Sprintf("^%s", pass)).Output()
-	if err != nil {
-		log.Info("git bisect failed", " pass=", pass, " fail=", fail)
+		out, err = exec.Command("git", "bisect", "--first-parent",
+			fmt.Sprintf("%s^", fail), fmt.Sprintf("^%s", pass)).Output()
+		if err != nil {
+			log.Info("git bisect failed", " pass=", pass, " fail=", fail)
+		}
 	}
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
