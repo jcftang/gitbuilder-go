@@ -53,32 +53,18 @@ func ExitStatus(err error) int {
 	return 1
 }
 
-// RunAll ...
-func (b *Client) RunAll() error {
-	for _, branch := range b.Branches() {
-		_nextrev, err := b.NextRev(branch)
-		if err != nil {
-			log.Error(err)
-		}
-		if _nextrev == "" {
-			log.Info("branch ", branch.Name, " is up to date")
-			continue
-		}
-		if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, _nextrev)); !os.IsNotExist(err) {
-			continue
-		}
-		if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, _nextrev)); !os.IsNotExist(err) {
-			continue
-		}
-
-		b.RunSetup(_nextrev)
-		err = b.RunBuild(_nextrev)
-		if err != nil {
-			log.Error(err)
-		}
+func (b *Client) isPass(commit string) bool {
+	if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, commit)); !os.IsNotExist(err) {
+		return true
 	}
-	b.RunReport()
-	return nil
+	return false
+}
+
+func (b *Client) isFail(commit string) bool {
+	if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, commit)); !os.IsNotExist(err) {
+		return true
+	}
+	return false
 }
 
 // RunSetup ...
@@ -170,17 +156,17 @@ func (b *Client) RunReport() {
 	// git for-each-ref --sort=-committerdate refs/
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Branch", "Status", "Commit", "Who", "Reason"})
-	for _, branch := range b.branchesByAge() {
+	for _, branch := range b.BranchesByAge() {
 		revs := b.revlist(branch)
 		fail := ""
 		pending := ""
 		for _, rev := range revs {
 			commit := rev.Commit[:7]
-			if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, rev.Commit)); !os.IsNotExist(err) {
+			if b.isPass(rev.Commit) {
 				table.Append([]string{branch.Name, "ok", commit, rev.Email, rev.Comment})
 				break
 			}
-			if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, rev.Commit)); !os.IsNotExist(err) {
+			if b.isFail(rev.Commit) {
 				fail = rev.Commit
 				table.Append([]string{branch.Name, "FAIL", commit, rev.Email, rev.Comment})
 			}

@@ -32,13 +32,14 @@ func main() {
 	if err != nil {
 		log.Warn(err)
 	}
-	br := buildroot.New(buildroot.Config{
+	config := buildroot.Config{
 		BuildPath:   b.BuildPath,
 		OutPath:     b.OutPath,
 		Repo:        b.Repo,
 		BuildScript: b.BuildScript,
-	})
-	err = br.RunAll()
+	}
+	br := buildroot.New(config)
+	err = buildroot.RunAll(br, config)
 	if err != nil {
 		log.Fatal(err)
 	}

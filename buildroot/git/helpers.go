@@ -36,7 +36,7 @@ func (b *Client) revlist(rev repo.Branch) repo.Revs {
 			continue
 		}
 		r = append(r, repo.Rev{Commit: commit, Email: email, Comment: comment})
-		if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, commit)); !os.IsNotExist(err) {
+		if b.isPass(commit) {
 			// return first passing commit
 			return r
 		}
@@ -132,9 +132,9 @@ func (b *Client) NextRev(branch repo.Branch) (string, error) {
 	pending := ""
 	last := ""
 	for _, r := range revs {
-		if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, r.Commit)); !os.IsNotExist(err) {
+		if b.isPass(r.Commit) {
 			pass = r.Commit
-		} else if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, r.Commit)); !os.IsNotExist(err) {
+		} else if b.isFail(r.Commit) {
 			fail = r.Commit
 		} else if pending == "" && fail == "" {
 			pending = r.Commit
@@ -172,14 +172,8 @@ func (b *Client) bisect(pass, fail string) (string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		line := scanner.Text()
-		_pass := false
-		_fail := false
-		if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, line)); !os.IsNotExist(err) {
-			_pass = true
-		}
-		if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, line)); !os.IsNotExist(err) {
-			_fail = true
-		}
+		_pass := b.isPass(line)
+		_fail := b.isFail(line)
 		if _pass && _fail {
 			return line, nil
 		}
