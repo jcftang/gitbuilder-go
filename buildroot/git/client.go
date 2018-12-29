@@ -55,8 +55,8 @@ func ExitStatus(err error) int {
 
 // RunAll ...
 func (b *Repo) RunAll() error {
-	for _, branch := range b.branches() {
-		_nextrev, err := b.nextRev(branch)
+	for _, branch := range b.Branches() {
+		_nextrev, err := b.NextRev(branch)
 		if err != nil {
 			log.Error(err)
 		}

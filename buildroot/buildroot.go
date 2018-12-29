@@ -2,6 +2,7 @@ package buildroot
 
 import (
 	"github.com/jcftang/gitbuilder-go/buildroot/git"
+	"github.com/jcftang/gitbuilder-go/repo"
 )
 
 // BuildRoot ...
@@ -10,6 +11,8 @@ type BuildRoot interface {
 	RunBuild(commit string) error
 	RunReport()
 	RunAll() error
+	Branches() repo.Branches
+	NextRev(branch repo.Branch) (string, error)
 }
 
 // Config ...
