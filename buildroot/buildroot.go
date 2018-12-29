@@ -7,9 +7,9 @@ import (
 // BuildRoot ...
 type BuildRoot interface {
 	RunSetup(commit string)
-	RunBuild(commit string)
+	RunBuild(commit string) error
 	RunReport()
-	RunAll()
+	RunAll() error
 }
 
 // Config ...

@@ -54,7 +54,7 @@ func ExitStatus(err error) int {
 }
 
 // RunAll ...
-func (b *Repo) RunAll() {
+func (b *Repo) RunAll() error {
 	for _, branch := range b.branches() {
 		_nextrev, err := b.nextRev(branch)
 		if err != nil {
@@ -72,9 +72,13 @@ func (b *Repo) RunAll() {
 		}
 
 		b.RunSetup(_nextrev)
-		b.RunBuild(_nextrev)
+		err = b.RunBuild(_nextrev)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 	b.RunReport()
+	return nil
 }
 
 // RunSetup ...
@@ -109,14 +113,14 @@ func (b *Repo) RunSetup(commit string) {
 }
 
 // RunBuild ...
-func (b *Repo) RunBuild(commit string) {
+func (b *Repo) RunBuild(commit string) error {
 	r, err := git.PlainOpen(b.BuildPath)
 	if err != nil {
-		log.Fatalf("err %v", err)
+		return err
 	}
 	w, err := r.Worktree()
 	if err != nil {
-		log.Fatalf("err %v", err)
+		return err
 	}
 	hash := plumbing.NewHash(commit)
 	checkoutopts := git.CheckoutOptions{Hash: hash}
@@ -140,24 +144,25 @@ func (b *Repo) RunBuild(commit string) {
 
 	f, err := os.Create("log.out")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	_, err = f.Write(stdoutStderr)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if rc == 0 {
 		err := os.Rename("log.out", fmt.Sprintf("%s/pass/%s", b.OutPath, commit))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	} else {
 		err := os.Rename("log.out", fmt.Sprintf("%s/fail/%s", b.OutPath, commit))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
+	return nil
 }
 
 // RunReport ...

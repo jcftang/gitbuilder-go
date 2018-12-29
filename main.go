@@ -15,25 +15,16 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-// BuildRoot ...
-type BuildRoot struct {
-	BuildPath   string `json:"build_path"`
-	OutPath     string `json:"out_path"`
-	Repo        string `json:"repo"`
-	BuildScript string `json:"build_script"`
-}
-
 func main() {
 	dat, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
-	b := BuildRoot{}
+	b := buildroot.Config{}
 	err = json.Unmarshal(dat, &b)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	_, err = git.PlainClone(b.BuildPath, false, &git.CloneOptions{
 		URL:               b.Repo,
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
@@ -41,12 +32,14 @@ func main() {
 	if err != nil {
 		log.Warn(err)
 	}
-
 	br := buildroot.New(buildroot.Config{
 		BuildPath:   b.BuildPath,
 		OutPath:     b.OutPath,
 		Repo:        b.Repo,
 		BuildScript: b.BuildScript,
 	})
-	br.RunAll()
+	err = br.RunAll()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
