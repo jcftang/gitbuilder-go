@@ -91,7 +91,8 @@ func (b *Client) Branches() repo.Branches {
 	return branches
 }
 
-func (b *Client) branchesByAge() repo.Branches {
+// BranchesByAge ...
+func (b *Client) BranchesByAge() repo.Branches {
 	cmd := exec.Command("git", "for-each-ref", "--sort=committerdate", "--format='%(objectname) %(refname)")
 	cmd.Dir = b.BuildPath
 	out, err := cmd.Output()

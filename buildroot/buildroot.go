@@ -12,6 +12,7 @@ type BuildRoot interface {
 	RunReport()
 	RunAll() error
 	Branches() repo.Branches
+	BranchesByAge() repo.Branches
 	NextRev(branch repo.Branch) (string, error)
 }
 
