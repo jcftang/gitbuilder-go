@@ -13,8 +13,8 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
-// Repo ...
-type Repo struct {
+// Client ...
+type Client struct {
 	BuildPath   string `json:"build_path"`
 	OutPath     string `json:"out_path"`
 	Repo        string `json:"repo"`
@@ -22,8 +22,8 @@ type Repo struct {
 }
 
 // New git repo instance
-func New(buildpath, outpath, repo, buildscript string) *Repo {
-	return &Repo{
+func New(buildpath, outpath, repo, buildscript string) *Client {
+	return &Client{
 		BuildPath:   buildpath,
 		OutPath:     outpath,
 		Repo:        repo,
@@ -54,7 +54,7 @@ func ExitStatus(err error) int {
 }
 
 // RunAll ...
-func (b *Repo) RunAll() error {
+func (b *Client) RunAll() error {
 	for _, branch := range b.Branches() {
 		_nextrev, err := b.NextRev(branch)
 		if err != nil {
@@ -82,7 +82,7 @@ func (b *Repo) RunAll() error {
 }
 
 // RunSetup ...
-func (b *Repo) RunSetup(commit string) {
+func (b *Client) RunSetup(commit string) {
 	paths := []string{
 		"pass",
 		"ignore",
@@ -113,7 +113,7 @@ func (b *Repo) RunSetup(commit string) {
 }
 
 // RunBuild ...
-func (b *Repo) RunBuild(commit string) error {
+func (b *Client) RunBuild(commit string) error {
 	r, err := git.PlainOpen(b.BuildPath)
 	if err != nil {
 		return err
@@ -166,7 +166,7 @@ func (b *Repo) RunBuild(commit string) error {
 }
 
 // RunReport ...
-func (b *Repo) RunReport() {
+func (b *Client) RunReport() {
 	// git for-each-ref --sort=-committerdate refs/
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Branch", "Status", "Commit", "Who", "Reason"})

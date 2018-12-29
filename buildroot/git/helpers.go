@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (b *Repo) revlist(rev repo.Branch) repo.Revs {
+func (b *Client) revlist(rev repo.Branch) repo.Revs {
 	cmd := exec.Command("git", "rev-list", "--first-parent",
 		"--pretty=format:%H %ce %s", string(rev.Name))
 	cmd.Dir = b.BuildPath
@@ -58,7 +58,8 @@ func reverse(ss []repo.Branch) {
 	}
 }
 
-func (b *Repo) Branches() repo.Branches {
+// Branches ...
+func (b *Client) Branches() repo.Branches {
 	cmd := exec.Command("git", "show-ref", "-d")
 	cmd.Dir = b.BuildPath
 	out, err := cmd.Output()
@@ -90,7 +91,7 @@ func (b *Repo) Branches() repo.Branches {
 	return branches
 }
 
-func (b *Repo) branchesByAge() repo.Branches {
+func (b *Client) branchesByAge() repo.Branches {
 	cmd := exec.Command("git", "for-each-ref", "--sort=committerdate", "--format='%(objectname) %(refname)")
 	cmd.Dir = b.BuildPath
 	out, err := cmd.Output()
@@ -123,7 +124,7 @@ func (b *Repo) branchesByAge() repo.Branches {
 }
 
 // NextRev ...
-func (b *Repo) NextRev(branch repo.Branch) (string, error) {
+func (b *Client) NextRev(branch repo.Branch) (string, error) {
 	revs := b.revlist(branch)
 	pass := ""
 	fail := ""
@@ -153,7 +154,7 @@ func (b *Repo) NextRev(branch repo.Branch) (string, error) {
 	return "", nil
 }
 
-func (b *Repo) bisect(pass, fail string) (string, error) {
+func (b *Client) bisect(pass, fail string) (string, error) {
 	if pass == "" || fail == "" {
 		return "", nil
 	}
