@@ -53,14 +53,16 @@ func ExitStatus(err error) int {
 	return 1
 }
 
-func (b *Client) isPass(commit string) bool {
+// IsPass ...
+func (b *Client) IsPass(commit string) bool {
 	if _, err := os.Stat(fmt.Sprintf("%s/pass/%s", b.OutPath, commit)); !os.IsNotExist(err) {
 		return true
 	}
 	return false
 }
 
-func (b *Client) isFail(commit string) bool {
+// IsFail ...
+func (b *Client) IsFail(commit string) bool {
 	if _, err := os.Stat(fmt.Sprintf("%s/fail/%s", b.OutPath, commit)); !os.IsNotExist(err) {
 		return true
 	}
@@ -162,11 +164,11 @@ func (b *Client) RunReport() {
 		pending := ""
 		for _, rev := range revs {
 			commit := rev.Commit[:7]
-			if b.isPass(rev.Commit) {
+			if b.IsPass(rev.Commit) {
 				table.Append([]string{branch.Name, "ok", commit, rev.Email, rev.Comment})
 				break
 			}
-			if b.isFail(rev.Commit) {
+			if b.IsFail(rev.Commit) {
 				fail = rev.Commit
 				table.Append([]string{branch.Name, "FAIL", commit, rev.Email, rev.Comment})
 			}

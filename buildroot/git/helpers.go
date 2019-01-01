@@ -36,7 +36,7 @@ func (b *Client) revlist(rev repo.Branch) repo.Revs {
 			continue
 		}
 		r = append(r, repo.Rev{Commit: commit, Email: email, Comment: comment})
-		if b.isPass(commit) {
+		if b.IsPass(commit) {
 			// return first passing commit
 			return r
 		}
@@ -132,9 +132,9 @@ func (b *Client) NextRev(branch repo.Branch) (string, error) {
 	pending := ""
 	last := ""
 	for _, r := range revs {
-		if b.isPass(r.Commit) {
+		if b.IsPass(r.Commit) {
 			pass = r.Commit
-		} else if b.isFail(r.Commit) {
+		} else if b.IsFail(r.Commit) {
 			fail = r.Commit
 		} else if pending == "" && fail == "" {
 			pending = r.Commit
@@ -172,8 +172,8 @@ func (b *Client) bisect(pass, fail string) (string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		line := scanner.Text()
-		_pass := b.isPass(line)
-		_fail := b.isFail(line)
+		_pass := b.IsPass(line)
+		_fail := b.IsFail(line)
 		if _pass && _fail {
 			return line, nil
 		}

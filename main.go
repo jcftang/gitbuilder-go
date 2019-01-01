@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/jcftang/gitbuilder-go/buildroot"
+	"github.com/jcftang/gitbuilder-go/runner"
 
 	log "github.com/sirupsen/logrus"
 	git "gopkg.in/src-d/go-git.v4"
@@ -39,7 +40,7 @@ func main() {
 		BuildScript: b.BuildScript,
 	}
 	br := buildroot.New(config)
-	err = buildroot.RunAll(br, config)
+	err = runner.RunAll(br)
 	if err != nil {
 		log.Fatal(err)
 	}
