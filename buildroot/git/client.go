@@ -1,6 +1,7 @@
 package git
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -70,7 +71,7 @@ func (b *Client) IsFail(commit string) bool {
 }
 
 // RunSetup ...
-func (b *Client) RunSetup(commit string) {
+func (b *Client) RunSetup(ctx context.Context, commit string) {
 	paths := []string{
 		"pass",
 		"ignore",
@@ -90,7 +91,7 @@ func (b *Client) RunSetup(commit string) {
 	}
 	for _, i := range c {
 		args := strings.Fields(i)
-		cmd := exec.Command(args[0], args[1])
+		cmd := exec.CommandContext(ctx, args[0], args[1])
 		cmd.Dir = b.BuildPath
 		_, err := cmd.Output()
 		rc := ExitStatus(err)
@@ -101,7 +102,7 @@ func (b *Client) RunSetup(commit string) {
 }
 
 // RunBuild ...
-func (b *Client) RunBuild(commit string) error {
+func (b *Client) RunBuild(ctx context.Context, commit string) error {
 	r, err := git.PlainOpen(b.BuildPath)
 	if err != nil {
 		return err
@@ -122,7 +123,7 @@ func (b *Client) RunBuild(commit string) error {
 
 	//args := strings.Fields(fmt.Sprintf("../build.sh 2>&1"))
 	args := strings.Fields(fmt.Sprintf("%s 2>&1", b.BuildScript))
-	cmd := exec.Command(args[0], args[1])
+	cmd := exec.CommandContext(ctx, args[0], args[1])
 	cmd.Dir = b.BuildPath
 	stdoutStderr, err := cmd.CombinedOutput()
 	rc := ExitStatus(err)

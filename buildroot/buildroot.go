@@ -1,14 +1,16 @@
 package buildroot
 
 import (
+	"context"
+
 	"github.com/jcftang/gitbuilder-go/buildroot/git"
 	"github.com/jcftang/gitbuilder-go/repo"
 )
 
 // BuildRoot ...
 type BuildRoot interface {
-	RunSetup(commit string)
-	RunBuild(commit string) error
+	RunSetup(ctx context.Context, commit string)
+	RunBuild(ctx context.Context, commit string) error
 	RunReport()
 	Branches() repo.Branches
 	BranchesByAge() repo.Branches
