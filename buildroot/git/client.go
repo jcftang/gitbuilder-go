@@ -2,6 +2,7 @@ package git
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,6 +21,7 @@ type Client struct {
 	OutPath     string `json:"out_path"`
 	Repo        string `json:"repo"`
 	BuildScript string `json:"build_script"`
+	logfile     *os.File
 }
 
 // New git repo instance
@@ -72,6 +74,12 @@ func (b *Client) IsFail(commit string) bool {
 
 // RunSetup ...
 func (b *Client) RunSetup(ctx context.Context, commit string) {
+	err := errors.New("Could not create log.out file")
+	b.logfile, err = os.Create("log.out")
+	if err != nil {
+		log.Error(err)
+	}
+	b.logfile.WriteString("Running setup\n\n")
 	paths := []string{
 		"pass",
 		"ignore",
@@ -84,7 +92,7 @@ func (b *Client) RunSetup(ctx context.Context, commit string) {
 			log.Fatalf("MkdirAll %q: %s", opath, err)
 		}
 	}
-
+	b.logfile.WriteString("Updating repo\n\n")
 	c := []string{
 		"git remote show | xargs git remote prune",
 		"git remote update",
@@ -103,6 +111,8 @@ func (b *Client) RunSetup(ctx context.Context, commit string) {
 
 // RunBuild ...
 func (b *Client) RunBuild(ctx context.Context, commit string) error {
+	b.logfile.WriteString("Starting build\n\n")
+
 	r, err := git.PlainOpen(b.BuildPath)
 	if err != nil {
 		return err
@@ -131,15 +141,11 @@ func (b *Client) RunBuild(ctx context.Context, commit string) error {
 		log.Info("Non-zero exit code", rc)
 	}
 
-	f, err := os.Create("log.out")
+	_, err = b.logfile.Write(stdoutStderr)
 	if err != nil {
 		return err
 	}
-
-	_, err = f.Write(stdoutStderr)
-	if err != nil {
-		return err
-	}
+	b.logfile.Close()
 	if rc == 0 {
 		err := os.Rename("log.out", fmt.Sprintf("%s/pass/%s", b.OutPath, commit))
 		if err != nil {
